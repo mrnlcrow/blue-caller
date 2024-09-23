@@ -1,0 +1,14 @@
+{% extends 'jobs/_base.html' %}
+
+{% block content %}
+<div class="flex">
+    <div>
+        <h1 class="text-3xl font-semibold">{{object.name}}</h1>
+        <p class="text-lg text-gray-800 my-2">{{object.tagline}}</p>
+        <p class="text-lg text-gray-800 my-2">{{object.phone_number}}</p>
+    </div>
+</div>
+    <hr class="my-4">
+    {{object.bio}}
+
+{% endblock content %}

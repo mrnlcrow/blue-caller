@@ -1,0 +1,22 @@
+{% extends 'jobs/_base.html' %}
+
+{% block content %}
+    <h1 class="text-4xl font-bold mb-8">All Available Workers</h1>
+    <div class="shadow">
+        {% for worker in object_list %}
+        <a href="{% url 'worker-detail' worker.pk %}">
+        <div class="p-6 border flex items-center">
+            <div>
+                <p class="text-lg font-semibold">
+                    {{worker.name}}
+                </p>
+                <p class="text-gray-700 pt-4">
+                    {{worker.tagline}} 
+                </p>
+            </div>
+        </div>
+        </a>
+        {% endfor %}
+    </div>
+
+{% endblock content %}
