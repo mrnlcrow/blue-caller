@@ -20,10 +20,10 @@
                 <div class="inline-flex items-center gap-2 list-none lg:ml-auto">
                     {% if user.is_authenticated %}
                     <p>{{user.email}}</p>
-                    {% if user.freelancer.profile_pic %}
+                    {% if user.worker.profile_pic %}
                     <img class="w-10 border rounded-full mr-4" src="{{ user.worker.profile_pic.url }}" alt="Profile pic">
                     {% endif %}
-                    {% if user.business.profile_pic %}
+                    {% if user.customer.profile_pic %}
                     <img class="w-10 border rounded-full mr-4" src="{{ user.customer.profile_pic.url }}" alt="Profile pic">
                     {% endif %}
                     <form action="{% url 'account_logout' %}" method="POST">

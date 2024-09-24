@@ -7,6 +7,11 @@
         <a href="{% url 'worker-detail' worker.pk %}">
         <div class="p-6 border flex items-center">
             <div>
+                {% if worker.profile_pic %}
+                <img class="w-20 border rounded-full mr-4" src="{{ worker.profile_pic.url }}" alt="Profile pic">
+                {% endif %}
+            </div>
+            <div>
                 <p class="text-lg font-semibold">
                     {{worker.name}}
                 </p>
