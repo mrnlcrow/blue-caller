@@ -39,6 +39,8 @@ class WorkerCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner=self.request.user
+        form.instance.latitude = self.request.POST.get('latitude')
+        form.instance.longitude = self.request.POST.get('longitude')
         return super(WorkerCreateView, self).form_valid(form)
     
     def add_worker(request):
@@ -59,7 +61,9 @@ class CustomerCreateView(LoginRequiredMixin, CreateView):
     fields=['name','profile_pic','phone_number']
     success_url=reverse_lazy('worker-list')
 
-    def form_valid(self, form):
+    def form_valid(self, form):    
+        form.instance.latitude = self.request.POST.get('latitude')
+        form.instance.longitude = self.request.POST.get('longitude')
         form.instance.owner=self.request.user
         return super(CustomerCreateView, self).form_valid(form)    
 
