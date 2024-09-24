@@ -5,6 +5,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from jobs.models import Worker, Customer
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 
 def index(request):
     return HttpResponse("<h1>BlueCaller</h1>")
@@ -13,8 +14,23 @@ def index(request):
 class WorkerListView(ListView):
     model = Worker
 
-class WorkerDetailView(DetailView):
+class WorkerDetailView(LoginRequiredMixin,DetailView):
     model = Worker
+
+    def get_queryset(self):
+        # Return all workers initially
+        return Worker.objects.all()
+
+    def get_object(self, queryset=None):
+        # Get the worker object based on the provided ID
+        worker = super().get_object(queryset)
+        
+        # Ensure that the user is either the owner of the worker or a customer
+        if self.request.user != worker.owner and not hasattr(self.request.user, 'customer'):
+            # Raise 404 if the user is not authorized to view the worker's detail
+            raise PermissionDenied("You do not have permission to view this worker's details.")
+        
+        return worker
 
 class WorkerCreateView(LoginRequiredMixin, CreateView):
     model = Worker
