@@ -12,6 +12,9 @@ class Worker(models.Model):
     bio=models.TextField(blank=True)
     profile_pic=models.ImageField(upload_to="profiles/", blank=True)
     verified = models.BooleanField(default=False)
+    citizenship_image = models.ImageField(upload_to='citizenship/', blank=True, null=True)
+    certificate_file = models.FileField(upload_to='certificates/', blank=True, null=True)
+
 
     def __str__(self):
         return f"{self.id} | {self.name}"
