@@ -15,6 +15,10 @@
                 <p class="text-lg font-semibold">
                     {{worker.name}}
                 </p>
+                {% if worker.verified %}
+                <span>&#10004;</span>  <!-- Unicode checkmark -->
+                {% else %}
+                {% endif %}
                 <p class="text-gray-700 pt-4">
                     {{worker.tagline}} 
                 </p>

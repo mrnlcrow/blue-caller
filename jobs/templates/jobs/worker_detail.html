@@ -8,7 +8,12 @@
         {% endif %}
     </div>
     <div>
-        <h1 class="text-3xl font-semibold">{{object.name}}</h1>
+        <h1 class="text-3xl font-semibold">{{object.name}}</h1> 
+        {% if worker.verified %}
+        <span>&#10004;</span>  <!-- Unicode checkmark -->
+        {% else %}
+        <p>Not Verified</p>
+        {% endif %}
         <p class="text-lg text-gray-800 my-2">{{object.tagline}}</p>
         <p class="text-lg text-gray-800 my-2">{{object.phone_number}}</p>
     </div>

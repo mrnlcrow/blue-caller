@@ -11,6 +11,7 @@ class Worker(models.Model):
     tagline=models.CharField(max_length=100)
     bio=models.TextField(blank=True)
     profile_pic=models.ImageField(upload_to="profiles/", blank=True)
+    verified = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.id} | {self.name}"
