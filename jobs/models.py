@@ -14,8 +14,13 @@ class Worker(models.Model):
     verified = models.BooleanField(default=False)
     citizenship_image = models.ImageField(upload_to='citizenship/', blank=True, null=True)
     certificate_file = models.FileField(upload_to='certificates/', blank=True, null=True)
+<<<<<<< HEAD
     latitude = models.CharField(max_length=20,null=True,blank=True)
     longitude = models.CharField(max_length=20,null=True,blank=True)
+=======
+    appointed = models.BooleanField(default=False)
+    appointment_date = models.DateTimeField(null=True, blank=True)
+>>>>>>> appointment
 
 
     def __str__(self):
@@ -31,3 +36,19 @@ class Customer(models.Model):
 
     def __str__(self):
         return f"{self.id} | {self.name}"
+    
+
+class Appointment(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    ]
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='customer_appointments')
+    worker = models.ForeignKey(Worker, on_delete=models.CASCADE, related_name='worker_appointments')
+    appointment_date = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    reason = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Appointment with {self.worker} on {self.date}"

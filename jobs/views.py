@@ -1,11 +1,14 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.views.generic import ListView, DetailView, CreateView
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
-from jobs.models import Worker, Customer
+from jobs.models import Worker, Customer, Appointment
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.contrib import messages
+from django.utils import timezone
+from django.core.mail import send_mail
 
 def index(request):
     return HttpResponse("<h1>BlueCaller</h1>")
@@ -76,3 +79,65 @@ def handle_login(request):
         return redirect(reverse_lazy('worker-list'))
     
     return render(request,'jobs/choose_account.html',{})
+
+def appoint_worker(request, worker_id):
+
+    worker = get_object_or_404(Worker, id = worker_id)
+    customer = get_object_or_404(Customer, owner=request.user)
+    appointment = Appointment.objects.create(
+        customer = customer,
+        worker = worker,
+        appointment_date = timezone.now(),
+        status = 'pending'
+    )
+    worker.appointed = True
+    worker.appointment_date = appointment.appointment_date
+    worker.save()
+    messages.success(request, "Worker has been appointed and notified sucessfully.")
+    return redirect('worker-list')
+
+def send_email_to_worker(worker):
+    subject = "Appointment Details"
+    message = f"Dear {worker.name},\n\n You have been appointed on {worker.appointment_date}.\n\nThankyou!"
+    from_email = "mitas.player@gmail.com"
+    recipent_list = [worker.email]
+    send_mail(subject, message, from_email, recipent_list)
+
+def customer_appointments(request):
+    # Assuming the logged-in user is a customer
+    customer = get_object_or_404(Customer, owner=request.user)
+    appointments = Appointment.objects.filter(customer=customer)
+    return render(request, 'jobs/customer_appointments.html', {'appointments': appointments})
+
+# View for Workers to Manage Appointments
+def worker_appointments(request):
+    # Assuming the logged-in user is a worker
+    worker = get_object_or_404(Worker, owner=request.user)
+    appointments = Appointment.objects.filter(worker=worker)
+    return render(request, 'jobs/worker_appointments.html', {'appointments': appointments})
+
+def accept_appointment(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    if request.method == 'POST':
+        appointment.status = 'accepted'
+        appointment.save()
+    return redirect('worker_appointments')
+
+def reject_appointment(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    if request.method == 'POST':
+        appointment.status = 'rejected'
+        appointment.save()
+    return redirect('worker_appointments')
+
+def delete_appointment(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    
+    # Ensure that only the customer or worker associated with the appointment can delete it
+    if request.user == appointment.customer.owner or request.user == appointment.worker.owner:
+        appointment.delete()
+        messages.success(request, "Appointment deleted successfully.")
+    else:
+        messages.error(request, "You are not authorized to delete this appointment.")
+    
+    return redirect('customer_appointments')  # Redirect back to customer appointments page
