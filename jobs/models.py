@@ -14,13 +14,10 @@ class Worker(models.Model):
     verified = models.BooleanField(default=False)
     citizenship_image = models.ImageField(upload_to='citizenship/', blank=True, null=True)
     certificate_file = models.FileField(upload_to='certificates/', blank=True, null=True)
-<<<<<<< HEAD
     latitude = models.CharField(max_length=20,null=True,blank=True)
     longitude = models.CharField(max_length=20,null=True,blank=True)
-=======
     appointed = models.BooleanField(default=False)
     appointment_date = models.DateTimeField(null=True, blank=True)
->>>>>>> appointment
 
 
     def __str__(self):

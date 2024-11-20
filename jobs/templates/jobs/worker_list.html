@@ -30,31 +30,6 @@
     <!-- Worker Cards Section -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         {% for worker in object_list %}
-<<<<<<< HEAD
-        <a href="{% url 'worker-detail' worker.pk %}">
-        <div class="p-6 border flex items-center">
-            <div>
-                {% if worker.profile_pic %}
-                <img class="w-20 border rounded-full mr-4" src="{{ worker.profile_pic.url }}" alt="Profile pic">
-                {% endif %}
-            </div>
-            <div>
-                <p class="text-lg font-semibold">
-                    {{worker.name}}
-                </p>
-                {% if worker.verified %}
-                <span>&#10004;</span>  <!-- Unicode checkmark -->
-                {% endif %}
-                <p class="text-gray-700 pt-4">
-                    {{worker.tagline}} 
-                </p>
-                <p class="text-gray-600 pt-4">
-                    {% distance_if_customer worker %}
-                </p>
-            </div>
-        </div>
-        </a>
-=======
             <a href="{% url 'worker-detail' worker.pk %}">
                 <div class="bg-white rounded-lg shadow-xl transform hover:scale-105 transition duration-300 ease-in-out">
                     <div class="p-6 flex items-center">
@@ -78,6 +53,9 @@
                             </div>
                             
                             <p class="text-gray-500 mt-3">{{ worker.tagline }}</p>
+                            <p class="text-gray-600 pt-4">
+                                {% distance_if_customer worker %}
+                            </p>
                         </div>
                     </div>
                     <div class="px-6 py-4 bg-gray-50 rounded-b-lg text-center">
@@ -87,7 +65,6 @@
                     </div>
                 </div>
             </a>
->>>>>>> appointment
         {% endfor %}
     </div>
 

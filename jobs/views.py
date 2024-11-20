@@ -32,7 +32,6 @@ class WorkerDetailView(LoginRequiredMixin,DetailView):
         if self.request.user != worker.owner and not hasattr(self.request.user, 'customer'):
             # Raise 404 if the user is not authorized to view the worker's detail
             raise PermissionDenied("You do not have permission to view this worker's details.")
-        
         return worker
 
 class WorkerCreateView(LoginRequiredMixin, CreateView):
