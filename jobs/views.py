@@ -82,18 +82,22 @@ def handle_login(request):
 def appoint_worker(request, worker_id):
 
     worker = get_object_or_404(Worker, id = worker_id)
-    customer = get_object_or_404(Customer, owner=request.user)
-    appointment = Appointment.objects.create(
-        customer = customer,
-        worker = worker,
-        appointment_date = timezone.now(),
-        status = 'pending'
-    )
-    worker.appointed = True
-    worker.appointment_date = appointment.appointment_date
-    worker.save()
-    messages.success(request, "Worker has been appointed and notified sucessfully.")
-    return redirect('worker-list')
+    appointment_count=Appointment.objects.filter(status="pending",worker=worker).count()
+    if appointment_count < 3:
+        customer = get_object_or_404(Customer, owner=request.user)
+        appointment = Appointment.objects.create(
+            customer = customer,
+            worker = worker,
+            appointment_date = timezone.now(),
+            status = 'pending'
+        )
+        worker.appointed = True
+        worker.appointment_date = appointment.appointment_date
+        worker.save()
+        messages.success(request, "Worker has been appointed and notified sucessfully.")
+    else:
+        print("message here")
+        return redirect('worker-list')
 
 def send_email_to_worker(worker):
     subject = "Appointment Details"

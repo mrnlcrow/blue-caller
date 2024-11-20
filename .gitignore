@@ -1,2 +1,7 @@
 env/
 venv
+jobs/__pycache__/
+config/__pycache__/
+jobs/migrations/__pycache__/
+accounts/__pycache__/
+accounts/migrations/__pycache__/
