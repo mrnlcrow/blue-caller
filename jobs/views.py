@@ -97,7 +97,7 @@ def appoint_worker(request, worker_id):
         messages.success(request, "Worker has been appointed and notified sucessfully.")
     else:
         print("message here")
-        return redirect('worker-list')
+    return redirect('worker-list')
 
 def send_email_to_worker(worker):
     subject = "Appointment Details"
