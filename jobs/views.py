@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.views.generic import ListView, DetailView, CreateView
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
@@ -17,6 +17,28 @@ def index(request):
 class WorkerListView(ListView):
     model = Worker
 
+    def get_queryset(self):
+        # Get the 'query' parameter from the URL (e.g., ?query=some_search_term)
+        query = self.request.GET.get('q')
+
+        if query:
+            # Filter workers by tagline using case-insensitive containment
+            return Worker.objects.filter(tagline__icontains=query)
+        else:
+            # If no query, display all workers
+            return Worker.objects.all()
+        
+    def get_context_data(self, **kwargs):
+        # Get the context data from the parent class
+        context = super().get_context_data(**kwargs)
+        
+        # Get the query from the URL (use 'q' here instead of 'query')
+        query = self.request.GET.get('q')
+        
+        # Add 'q' to the context so it can be used in the template
+        context['q'] = query
+        
+        return context
 class WorkerDetailView(LoginRequiredMixin,DetailView):
     model = Worker
 
@@ -144,3 +166,16 @@ def delete_appointment(request, appointment_id):
         messages.error(request, "You are not authorized to delete this appointment.")
     
     return redirect('customer_appointments')  # Redirect back to customer appointments page
+
+def complete_appointment(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+
+    # Ensure only the assigned worker can mark as completed
+    if appointment.worker.owner != request.user:
+        return HttpResponseForbidden("You are not allowed to complete this appointment.")
+
+    # Update the status to "Completed"
+    appointment.status = 'Completed'
+    appointment.save()
+
+    return redirect('worker_appointments')  # Redirect to the worker's dashboard or another relevant page

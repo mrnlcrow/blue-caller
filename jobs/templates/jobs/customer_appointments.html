@@ -20,9 +20,18 @@
                         <span class="font-semibold">Worker:</span> {{ appointment.worker.name }}
                     </p>
                     <p class="text-gray-700">
-                        <span class="font-semibold">Status:</span> {{ appointment.status }}
+                        <span class="font-semibold">Status:</span>     
+                        {% if appointment.status == 'pending' %}
+                            <span class="text-yellow-500 font-semibold">Pending</span>
+                        {% elif appointment.status == 'accepted' %}
+                            <span class="text-green-500 font-semibold">Accepted</span>
+                        {% elif appointment.status == 'rejected' %}
+                            <span class="text-red-500 font-semibold">Rejected</span>
+                        {% elif appointment.status == 'Completed' %}
+                            <span class="text-blue-500 font-semibold">Completed</span>
+                        {% endif %} 
                     </p>
-                    {% if user == appointment.customer.owner %}
+                    {% if user == appointment.customer.owner and appointment.status != 'Completed' %}
                         <form action="{% url 'delete_appointment' appointment.id %}" method="post" class="mt-4">
                             {% csrf_token %}
                             <button type="submit" class="px-4 py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700 transition duration-300 ease-in-out">

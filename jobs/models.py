@@ -40,6 +40,7 @@ class Appointment(models.Model):
         ('pending', 'Pending'),
         ('accepted', 'Accepted'),
         ('rejected', 'Rejected'),
+        ('completed', 'Completed'),
     ]
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='customer_appointments')
     worker = models.ForeignKey(Worker, on_delete=models.CASCADE, related_name='worker_appointments')
@@ -48,4 +49,4 @@ class Appointment(models.Model):
     reason = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"Appointment with {self.worker} on {self.date}"
+        return f"Appointment with {self.worker} on {self.appointment_date}"

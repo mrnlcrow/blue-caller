@@ -23,6 +23,7 @@
                     </p>
         
                     <div class="mt-4 flex space-x-4">
+                        {% if appointment.status == 'pending' %}
                         <!-- Accept Button -->
                         <form action="{% url 'accept_appointment' appointment.id %}" method="post">
                             {% csrf_token %}
@@ -38,6 +39,14 @@
                                 Reject
                             </button>
                         </form>
+                       {% else %}
+                        <form action="{% url 'complete_appointment' appointment.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">
+                                Completed
+                            </button>
+                        </form>
+                        {% endif %}
                 </li>
             {% endfor %}
         </ul>
