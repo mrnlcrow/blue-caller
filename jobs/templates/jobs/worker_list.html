@@ -74,6 +74,40 @@
                             <p class="text-gray-600 pt-4">
                                 {% distance_if_customer worker %}
                             </p>
+                            <!-- Display Rating -->
+                            <div class="mt-4 flex items-center justify-center">
+                                <div class="flex space-x-1">
+                                    <div class="rating flex justify-center">
+                                        <div class="stars flex">
+                                            <!-- Full Stars -->
+                                            {% for star in worker.full_stars %}
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="gold">
+                                                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                                </svg>
+                                            {% endfor %}
+
+                                            <!-- Half Star -->
+                                            {% for star in worker.half_star %}
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="gold">
+                                                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" clip-path="url(#half-mask)"/>
+                                                    <defs>
+                                                        <clipPath id="half-mask">
+                                                            <rect x="0" y="0" width="50%" height="100%"/>
+                                                        </clipPath>
+                                                    </defs>
+                                                </svg>
+                                            {% endfor %}
+                                            
+                                            <!-- Empty Stars -->
+                                            {% for star in worker.empty_stars %}
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="gray">
+                                                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                                </svg>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="px-6 py-4 bg-gray-50 rounded-b-lg text-center">

@@ -1,5 +1,23 @@
 {% extends 'jobs/_base.html' %}
 
+<style>
+.rating {
+    display: flex;
+    justify-content: center; /* Center the stars horizontally */
+    align-items: center;     /* Center the stars vertically, optional */
+}
+
+.stars {
+    display: flex;           /* This will align the stars horizontally */
+    gap: 5px;                /* Space between stars */
+}
+
+.stars svg {
+    width: 24px;             /* Set the size of the stars */
+    height: 24px;
+}
+
+</style>
 {% block content %}
     <!-- Worker Info Section -->
     <div class="bg-white p-6 rounded-lg shadow-xl">
@@ -26,6 +44,44 @@
                 
                 <p class="text-lg text-gray-800 mt-3">{{ object.tagline }}</p>
                 <p class="text-lg text-gray-800 mt-2">{{ object.phone_number }}</p>
+                <!-- Display Average Rating -->
+                <div class="mt-4 flex items-center justify-center">
+                    <div class="flex space-x-1">
+                        <div class="rating flex justify-center">
+                            <div class="stars flex">
+                                <!-- Full Stars -->
+                                {% for star in full_stars %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="gold">
+                                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                    </svg>
+                                {% endfor %}
+                
+                                <!-- Half Star -->
+                                {% for star in half_star %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="gold">
+                                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" clip-path="url(#half-mask)"/>
+                                        <defs>
+                                            <clipPath id="half-mask">
+                                                <rect x="0" y="0" width="50%" height="100%"/>
+                                            </clipPath>
+                                        </defs>
+                                    </svg>
+                                {% endfor %}
+                
+                                <!-- Empty Stars -->
+                                {% for star in empty_stars %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="gray">
+                                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                    </svg>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="ml-3 text-gray-600 text-lg font-semibold">{{ average_rating }} / 5</p>
+
+                
                 
                 <!-- Appoint Worker Button -->
                 <form action="{% url 'appoint-worker' worker.id %}" method="post" class="mt-6">

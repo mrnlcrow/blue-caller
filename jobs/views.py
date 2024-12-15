@@ -1,14 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.views.generic import ListView, DetailView, CreateView
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
-from jobs.models import Worker, Customer, Appointment
+from jobs.models import Worker, Customer, Appointment, WorkerRating
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.utils import timezone
 from django.core.mail import send_mail
+from django.db.models import Avg
 
 def index(request):
     return HttpResponse("<h1>BlueCaller</h1>")
@@ -37,10 +38,27 @@ class WorkerListView(ListView):
         
         # Add 'q' to the context so it can be used in the template
         context['q'] = query
+
+        # Add average rating for each worker
+        workers = context['worker_list']  # The list of workers passed in context
+        for worker in workers:
+            # Calculate the worker's average rating
+            average_rating = WorkerRating.objects.filter(appointment__worker=worker).aggregate(Avg('average_rating'))['average_rating__avg']
+            worker.average_rating = round(average_rating, 1) if average_rating else 0  # Default to 0 if no ratings exist
+
+            # Calculate the number of stars
+            full_stars = int(worker.average_rating)
+            half_star = 1 if worker.average_rating % 1 >= 0.5 else 0
+            empty_stars = 5 - (full_stars + half_star)
+            
+            worker.full_stars = [1] * full_stars  # List of full stars
+            worker.half_star = [1] * half_star  # List for half star (1 or 0)
+            worker.empty_stars = [1] * empty_stars  # List of empty stars
         
         return context
-class WorkerDetailView(LoginRequiredMixin,DetailView):
+class WorkerDetailView(LoginRequiredMixin, DetailView):
     model = Worker
+    template_name = 'jobs/worker_detail.html'  # Specify your template file
 
     def get_queryset(self):
         # Return all workers initially
@@ -52,9 +70,28 @@ class WorkerDetailView(LoginRequiredMixin,DetailView):
         
         # Ensure that the user is either the owner of the worker or a customer
         if self.request.user != worker.owner and not hasattr(self.request.user, 'customer'):
-            # Raise 404 if the user is not authorized to view the worker's detail
+            # Raise 403 if the user is not authorized to view the worker's detail
             raise PermissionDenied("You do not have permission to view this worker's details.")
         return worker
+
+    def get_context_data(self, **kwargs):
+        # Add additional context data to the template
+        context = super().get_context_data(**kwargs)
+        worker = self.get_object()
+        
+        # Calculate the worker's average rating
+
+        average_rating = WorkerRating.objects.filter(appointment__worker=worker).aggregate(Avg('average_rating'))['average_rating__avg']
+        
+        context['average_rating'] = round(average_rating, 1) if average_rating else 0  # Default to 0 if no ratings exist
+        full_stars = int(context['average_rating'])
+        half_star = 1 if context['average_rating'] % 1 >= 0.5 else 0
+        empty_stars = 5 - (full_stars + half_star)
+        
+        context['full_stars'] = [1] * full_stars  # List of full stars
+        context['half_star'] = [1] * half_star  # List for half star (1 or 0)
+        context['empty_stars'] = [1] * empty_stars  # List of empty stars
+        return context
 
 class WorkerCreateView(LoginRequiredMixin, CreateView):
     model = Worker
@@ -179,3 +216,44 @@ def complete_appointment(request, appointment_id):
     appointment.save()
 
     return redirect('worker_appointments')  # Redirect to the worker's dashboard or another relevant page
+
+def rate_worker(request, appointment_id):
+    # Fetch the appointment and ensure the user is the customer
+    appointment = get_object_or_404(Appointment, id=appointment_id, customer=request.user.customer)
+
+    # Ensure the appointment is completed before allowing a rating
+    if appointment.status != 'Completed':
+        return HttpResponseForbidden("You can only rate a worker after the appointment is completed.")
+
+    if request.method == 'POST':
+        rating_value = request.POST.get('rating')
+
+        # Validate the rating value
+        if not rating_value or not rating_value.isdigit() or int(rating_value) < 1 or int(rating_value) > 5:
+            return HttpResponseForbidden("Invalid rating value. It should be between 1 and 5.")
+
+        # Check if the user has already rated this appointment
+        existing_rating = WorkerRating.objects.filter(appointment=appointment, appointment__customer=request.user.customer).exists()
+        if existing_rating:
+            return HttpResponseForbidden("You have already rated this worker for this appointment.")
+
+        # Create the new rating
+        if WorkerRating.objects.filter(worker = appointment.worker).exists():
+            past_rating = WorkerRating.objects.get(worker = appointment.worker)
+            total_rating = int(rating_value) + past_rating.rating
+            appointment_count = past_rating.appointment.count()  + 1
+            new_average = total_rating / appointment_count
+            past_rating.rating = total_rating
+            past_rating.average_rating = new_average
+            past_rating.appointment.add(appointment)
+            past_rating.save()
+        else:
+            new_object = WorkerRating.objects.create(worker=appointment.worker,rating=rating_value,average_rating=float(rating_value))
+            new_object.appointment.add(appointment)
+                                                     
+              # Link the rating to the appointment via the ManyToManyField
+
+        return redirect('worker-list')
+
+    # For GET requests, render a form for rating
+    return render(request, 'jobs/rate_worker.html', {'appointment': appointment})

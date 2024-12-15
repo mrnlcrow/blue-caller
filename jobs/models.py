@@ -19,6 +19,10 @@ class Worker(models.Model):
     appointed = models.BooleanField(default=False)
     appointment_date = models.DateTimeField(null=True, blank=True)
 
+    def average_rating(self):
+        from django.db.models import Avg
+        average = WorkerRating.objects.filter(appointment__worker=self).aggregate(Avg('rating'))['rating__avg']
+        return round(average, 1) if average else 0  # Return 0 if no ratings exist
 
     def __str__(self):
         return f"{self.id} | {self.name}"
@@ -50,3 +54,14 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"Appointment with {self.worker} on {self.appointment_date}"
+    
+class WorkerRating(models.Model):
+    worker = models.ForeignKey(Worker,on_delete=models.CASCADE)
+    appointment = models.ManyToManyField(Appointment, related_name='ratings')
+    rating = models.PositiveSmallIntegerField()  # Rating between 1 and 5
+    created_at = models.DateTimeField(auto_now_add=True)
+    average_rating = models.FloatField(default=0.0)
+
+    # def __str__(self):
+    #     return f"Rating for {self.appointment.worker} {self.appointment.customer} - {self.rating} stars"
+
