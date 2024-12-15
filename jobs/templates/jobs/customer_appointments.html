@@ -38,6 +38,23 @@
                                 Delete Appointment
                             </button>
                         </form>
+                    {% elif user == appointment.customer.owner and appointment.status == 'Completed' %}
+                        <!-- Star Rating System -->
+                            {% csrf_token %}
+                            <div class="flex items-center space-x-2">
+                                <input type="hidden" id="rating" name="rating" value="0"> <!-- Hidden field to store rating -->
+                                <!-- Star Buttons -->
+                                {% for star in "12345" %}
+                                    <button type="button" 
+                                            data-value="{{ star }}" 
+                                            class="rating-star text-gray-400 hover:text-yellow-400 text-2xl transition duration-300">
+                                        &#9733;
+                                    </button>
+                                {% endfor %}
+                            </div>
+                            <button type="submit" class="mt-4 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition duration-300">
+                                Submit Rating
+                            </button>
                     {% endif %}
                 </li>
             {% endfor %}
