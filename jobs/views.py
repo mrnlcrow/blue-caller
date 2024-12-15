@@ -222,7 +222,7 @@ def rate_worker(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id, customer=request.user.customer)
 
     # Ensure the appointment is completed before allowing a rating
-    if appointment.status != 'Completed':
+    if appointment.status != 'completed':
         return HttpResponseForbidden("You can only rate a worker after the appointment is completed.")
 
     if request.method == 'POST':

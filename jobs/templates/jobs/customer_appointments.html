@@ -27,18 +27,18 @@
                             <span class="text-green-500 font-semibold">Accepted</span>
                         {% elif appointment.status == 'rejected' %}
                             <span class="text-red-500 font-semibold">Rejected</span>
-                        {% elif appointment.status == 'Completed' %}
+                        {% elif appointment.status == 'completed' %}
                             <span class="text-blue-500 font-semibold">Completed</span>
                         {% endif %} 
                     </p>
-                    {% if user == appointment.customer.owner and appointment.status != 'Completed' %}
+                    {% if user == appointment.customer.owner and appointment.status != 'completed' %}
                         <form action="{% url 'delete_appointment' appointment.id %}" method="post" class="mt-4">
                             {% csrf_token %}
                             <button type="submit" class="px-4 py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700 transition duration-300 ease-in-out">
                                 Delete Appointment
                             </button>
                         </form>
-                        {% elif user == appointment.customer.owner and appointment.status == 'Completed' %}
+                        {% elif user == appointment.customer.owner and appointment.status == 'completed' %}
                         <!-- Star Rating Form -->
                         <form action="{% url 'rate_worker' appointment.id %}" method="post" class="mt-6">
                             {% csrf_token %}
