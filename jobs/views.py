@@ -9,7 +9,8 @@ from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.utils import timezone
 from django.core.mail import send_mail
-from django.db.models import Avg
+from django.db.models import Avg, QuerySet
+from jobs.templatetags.distance import calculate_distance
 
 def index(request):
     return HttpResponse("<h1>BlueCaller</h1>")
@@ -17,17 +18,47 @@ def index(request):
 #class based view - reduces the code and simplifies
 class WorkerListView(ListView):
     model = Worker
+    template_name = 'worker_list.html'
 
     def get_queryset(self):
-        # Get the 'query' parameter from the URL (e.g., ?query=some_search_term)
-        query = self.request.GET.get('q')
+        query = self.request.GET.get('q')  # Search query
+        filter_param = self.request.GET.get('filter')  # Filter parameter
 
+        queryset = Worker.objects.all()
+
+        # Apply search functionality (by tagline) first
         if query:
-            # Filter workers by tagline using case-insensitive containment
-            return Worker.objects.filter(tagline__icontains=query)
-        else:
-            # If no query, display all workers
-            return Worker.objects.all()
+            queryset = queryset.filter(tagline__icontains=query)
+
+        # Filter by Rating
+        if filter_param == 'rating':
+            # Filter workers by rating (only those already searched)
+            queryset = queryset.annotate(avg_rating=Avg('workerrating__rating')).order_by('-avg_rating')
+
+        # Filter by Distance
+        elif filter_param == 'distance':
+            customer = getattr(self.request.user, 'customer', None)
+            if customer and customer.latitude and customer.longitude:
+                customer_lat = float(customer.latitude)
+                customer_lon = float(customer.longitude)
+
+                # Add distance attribute to each worker using the distance calculation function
+                queryset_with_distance = []
+                for worker in queryset:
+                    worker.distance = calculate_distance(
+                        worker.latitude, worker.longitude, customer_lat, customer_lon
+                    )
+                    queryset_with_distance.append(worker)
+
+                # Sort workers by distance (smallest first)
+                queryset_with_distance.sort(key=lambda worker: worker.distance)
+
+                # Convert list back into a QuerySet using worker IDs sorted by distance
+                queryset = Worker.objects.filter(id__in=[worker.id for worker in queryset_with_distance])
+
+        return queryset
+
+
         
     def get_context_data(self, **kwargs):
         # Get the context data from the parent class
@@ -40,7 +71,7 @@ class WorkerListView(ListView):
         context['q'] = query
 
         # Add average rating for each worker
-        workers = context['worker_list']  # The list of workers passed in context
+        workers = context.get('worker_list', self.get_queryset())  # Use get_queryset as fallback
         for worker in workers:
             # Calculate the worker's average rating
             average_rating = WorkerRating.objects.filter(appointment__worker=worker).aggregate(Avg('average_rating'))['average_rating__avg']
@@ -55,7 +86,9 @@ class WorkerListView(ListView):
             worker.half_star = [1] * half_star  # List for half star (1 or 0)
             worker.empty_stars = [1] * empty_stars  # List of empty stars
         
+        context['worker_list'] = workers  # Ensure worker_list is added explicitly
         return context
+
 class WorkerDetailView(LoginRequiredMixin, DetailView):
     model = Worker
     template_name = 'jobs/worker_detail.html'  # Specify your template file
@@ -212,7 +245,7 @@ def complete_appointment(request, appointment_id):
         return HttpResponseForbidden("You are not allowed to complete this appointment.")
 
     # Update the status to "Completed"
-    appointment.status = 'Completed'
+    appointment.status = 'completed'
     appointment.save()
 
     return redirect('worker_appointments')  # Redirect to the worker's dashboard or another relevant page
