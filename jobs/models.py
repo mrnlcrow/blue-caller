@@ -62,6 +62,4 @@ class WorkerRating(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     average_rating = models.FloatField(default=0.0)
 
-    # def __str__(self):
-    #     return f"Rating for {self.appointment.worker} {self.appointment.customer} - {self.rating} stars"
-
+#This is a check for merge 
