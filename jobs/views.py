@@ -117,8 +117,10 @@ class WorkerDetailView(LoginRequiredMixin, DetailView):
         # Calculate the worker's average rating
 
         average_rating = WorkerRating.objects.filter(appointment__worker=worker).aggregate(Avg('average_rating'))['average_rating__avg']
-        
         context['average_rating'] = round(average_rating, 1) if average_rating else 0  # Default to 0 if no ratings exist
+
+        total_ratings = WorkerRating.objects.filter(appointment__worker=worker).count()
+        context['total_ratings'] = total_ratings
         full_stars = int(context['average_rating'])
         half_star = 1 if context['average_rating'] % 1 >= 0.5 else 0
         empty_stars = 5 - (full_stars + half_star)

@@ -113,10 +113,10 @@
                                 {% distance_if_customer worker %}
                             </p>
                             <!-- Display Rating -->
-                            <!-- Display Average Rating -->
                             <div class="mt-4 flex items-center justify-center">
-                                <div class="flex space-x-1">
-                                    <div class="rating flex justify-center">
+                                <div class="flex items-center space-x-3">
+                                    <!-- Stars -->
+                                    <div class="rating flex">
                                         <div class="stars flex">
                                             <!-- Full Stars -->
                                             {% for star in worker.full_stars %}
@@ -124,7 +124,7 @@
                                                     <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                                                 </svg>
                                             {% endfor %}
-                            
+
                                             <!-- Half Star -->
                                             {% for star in worker.half_star %}
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="gold">
@@ -136,7 +136,7 @@
                                                     </defs>
                                                 </svg>
                                             {% endfor %}
-                            
+
                                             <!-- Empty Stars -->
                                             {% for star in worker.empty_stars %}
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="gray">
@@ -145,12 +145,16 @@
                                             {% endfor %}
                                         </div>
                                     </div>
+
+                                    <!-- Average Rating -->
+                                    <p class="text-gray-600 text-lg font-bold">{{ worker.average_rating }} / 5</p>
+
+                                    <!-- Total Ratings -->
+                                    <p class="text-gray-600 text-lg font-semibold">({{ worker.total_ratings }})</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <p class="ml-3 text-gray-600 text-lg font-semibold">{{ worker.average_rating }} / 5</p>
-                    <p class="ml-3 text-gray-600 text-sm">({{ worker.total_ratings }} ratings)</p>
 
                     <div class="px-6 py-4 bg-gray-50 rounded-b-lg text-center">
                         <button class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transform hover:scale-105 transition duration-200 ease-in-out">
