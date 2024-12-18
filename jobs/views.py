@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.db.models import Avg, QuerySet
 from jobs.templatetags.distance import calculate_distance
+from django.db.models import F, ExpressionWrapper, FloatField
 
 def index(request):
     return HttpResponse("<h1>BlueCaller</h1>")
@@ -25,7 +26,9 @@ class WorkerListView(ListView):
         filter_param = self.request.GET.get('filter')  # Filter parameter
 
         queryset = Worker.objects.all()
-
+        print(queryset)
+        for i in queryset:
+            print(i)
         # Apply search functionality (by tagline) first
         if query:
             queryset = queryset.filter(tagline__icontains=query)
@@ -35,6 +38,7 @@ class WorkerListView(ListView):
             # Filter workers by rating (only those already searched)
             queryset = queryset.annotate(avg_rating=Avg('workerrating__rating')).order_by('-avg_rating')
 
+
         # Filter by Distance
         elif filter_param == 'distance':
             customer = getattr(self.request.user, 'customer', None)
@@ -42,19 +46,15 @@ class WorkerListView(ListView):
                 customer_lat = float(customer.latitude)
                 customer_lon = float(customer.longitude)
 
-                # Add distance attribute to each worker using the distance calculation function
-                queryset_with_distance = []
-                for worker in queryset:
-                    worker.distance = calculate_distance(
-                        worker.latitude, worker.longitude, customer_lat, customer_lon
+                # Annotate workers with calculated distance
+                queryset = queryset.annotate(
+                    distance=ExpressionWrapper(
+                        # Distance formula using latitudes and longitudes (Haversine formula or similar)
+                        # This is just a sample, you might want to replace it with a proper calculation.
+                        (F('latitude') - customer_lat) ** 2 + (F('longitude') - customer_lon) ** 2,
+                        output_field=FloatField()
                     )
-                    queryset_with_distance.append(worker)
-
-                # Sort workers by distance (smallest first)
-                queryset_with_distance.sort(key=lambda worker: worker.distance)
-
-                # Convert list back into a QuerySet using worker IDs sorted by distance
-                queryset = Worker.objects.filter(id__in=[worker.id for worker in queryset_with_distance])
+                ).order_by('distance')  # Order by the calculated distance
 
         return queryset
 
