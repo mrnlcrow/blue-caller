@@ -26,9 +26,7 @@ class WorkerListView(ListView):
         filter_param = self.request.GET.get('filter')  # Filter parameter
 
         queryset = Worker.objects.all()
-        print(queryset)
-        for i in queryset:
-            print(i)
+
         # Apply search functionality (by tagline) first
         if query:
             queryset = queryset.filter(tagline__icontains=query)
@@ -76,6 +74,10 @@ class WorkerListView(ListView):
             # Calculate the worker's average rating
             average_rating = WorkerRating.objects.filter(appointment__worker=worker).aggregate(Avg('average_rating'))['average_rating__avg']
             worker.average_rating = round(average_rating, 1) if average_rating else 0  # Default to 0 if no ratings exist
+
+            # Get the total number of ratings
+            total_ratings = WorkerRating.objects.filter(appointment__worker=worker).count()
+            worker.total_ratings = total_ratings  # Pass the total number of ratings to the template
 
             # Calculate the number of stars
             full_stars = int(worker.average_rating)
