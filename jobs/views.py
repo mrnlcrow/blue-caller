@@ -47,8 +47,7 @@ class WorkerListView(ListView):
                 # Annotate workers with calculated distance
                 queryset = queryset.annotate(
                     distance=ExpressionWrapper(
-                        # Distance formula using latitudes and longitudes (Haversine formula or similar)
-                        # This is just a sample, you might want to replace it with a proper calculation.
+                        # Distance formula using latitudes and longitudes (Haversine formula)
                         (F('latitude') - customer_lat) ** 2 + (F('longitude') - customer_lon) ** 2,
                         output_field=FloatField()
                     )
@@ -236,10 +235,14 @@ def delete_appointment(request, appointment_id):
     if request.user == appointment.customer.owner or request.user == appointment.worker.owner:
         appointment.delete()
         messages.success(request, "Appointment deleted successfully.")
+        if request.user == appointment.customer.owner:
+            return redirect('customer_appointments')  # Redirect to customer appointments page
+        elif request.user == appointment.worker.owner:
+            return redirect('worker_appointments')  # Redirect to worker appointments page
     else:
         messages.error(request, "You are not authorized to delete this appointment.")
     
-    return redirect('customer_appointments')  # Redirect back to customer appointments page
+    return redirect('worker_list')  # Redirect back to customer appointments page
 
 def complete_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id)
