@@ -178,7 +178,7 @@ def appoint_worker(request, worker_id):
 
     worker = get_object_or_404(Worker, id = worker_id)
     appointment_count=Appointment.objects.filter(status="pending",worker=worker).count()
-    if appointment_count < 3:
+    if appointment_count < 1:
         customer = get_object_or_404(Customer, owner=request.user)
         appointment = Appointment.objects.create(
             customer = customer,
@@ -191,7 +191,7 @@ def appoint_worker(request, worker_id):
         worker.save()
         messages.success(request, "Worker has been appointed and notified sucessfully.")
     else:
-        print("message here")
+        messages.success(request, "Worker has already been appointed.")
     return redirect('worker-list')
 
 def send_email_to_worker(worker):
