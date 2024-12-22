@@ -2,6 +2,8 @@
 {% load distance %}
 
 {% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
     <!-- Title Section -->
     <div class="flex items-center justify-between mb-12">
         
@@ -67,14 +69,78 @@
             {% endif %}
         
             {% if user.worker.name %}
-                <h1 class="text-3xl font-bold tracking-tighter text-black-600 transition duration-500 ease-in-out transform tracking-relaxed lg:pr-8">All Available Workers</h1>
-                <form action="{% url 'worker_appointments' %}" method="get" class="ml-auto">
-                    <button type="submit" class="px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-2xl transform hover:scale-105 transition duration-300 ease-in-out">
-                        Manage Appointments
-                    </button>
-                </form>
-            {% endif %}
-        </div>
+                <div class="max-w-7xl mx-auto my-10 p-6 bg-gray-50 shadow-lg rounded-lg">
+                    <h2 class="text-3xl font-bold text-blue-600 mb-8">My Appointments</h2>
+                    {% if appointments %}
+                        <ul class="space-y-6">
+                            {% for appointment in appointments %}
+                                <li class="p-6 border rounded-lg bg-white shadow-md hover:bg-gray-100 transition duration-300">
+                                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                                        <!-- Appointment Details -->
+                                        <div class="text-gray-700 space-y-2">
+                                            <p>
+                                                <span class="font-semibold">Date:</span> 
+                                                {{ appointment.appointment_date|date:"F j, Y, g:i a" }}
+                                            </p>
+                                            <p>
+                                                <span class="font-semibold">Customer:</span> 
+                                                {{ appointment.customer.name }}
+                                            </p>
+                                            <p>
+                                                <span class="font-semibold">Contact No:</span> 
+                                                {{ appointment.customer.phone_number }}
+                                            </p>
+                                            <p>
+                                                <span class="font-semibold">Status:</span> 
+                                                {{ appointment.status|title }}
+                                            </p>
+                                        </div>
+
+                                        <!-- Action Buttons -->
+                                        <div class="mt-4 md:mt-0 flex space-x-4">
+                                            {% if appointment.status == 'pending' %}
+                                                <form action="{% url 'accept_appointment' appointment.id %}" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit" 
+                                                            class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition">
+                                                        Accept
+                                                    </button>
+                                                </form>
+                                                <form action="{% url 'reject_appointment' appointment.id %}" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit" 
+                                                            class="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition">
+                                                        Reject
+                                                    </button>
+                                                </form>
+                                            {% elif appointment.status == 'accepted' %}
+                                                <form action="{% url 'complete_appointment' appointment.id %}" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit" 
+                                                            class="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">
+                                                        Completed
+                                                    </button>
+                                                </form>
+                                            {% elif appointment.status == 'completed' %}
+                                                <form action="{% url 'delete_appointment' appointment.id %}" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit" 
+                                                            class="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition">
+                                                        Delete Appointment
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-gray-500 text-center">You currently have no appointments.</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
         
         {% endif %}
     </div>
@@ -83,7 +149,8 @@
     {% endif %}
 
     <!-- Worker Cards Section -->
-     
+
+    {% if user.customer.name %}
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         {% for worker in object_list %}
             <a href="{% url 'worker-detail' worker.pk %}">
@@ -165,5 +232,6 @@
             </a>
         {% endfor %}
     </div>
+    {% endif %}
 
 {% endblock content %}

@@ -66,6 +66,10 @@ class WorkerListView(ListView):
         
         # Add 'q' to the context so it can be used in the template
         context['q'] = query
+        # Add worker appointments if the user is a worker
+        if hasattr(self.request.user, 'worker'):
+            appointments = Appointment.objects.filter(worker=self.request.user.worker).select_related('customer')
+            context['appointments'] = appointments
 
         # Add average rating for each worker
         workers = context.get('worker_list', self.get_queryset())  # Use get_queryset as fallback
@@ -172,6 +176,7 @@ def handle_login(request):
     if request.user.get_worker() or request.user.get_customer():
         return redirect(reverse_lazy('worker-list'))
     
+    
     return render(request,'jobs/choose_account.html',{})
 
 def appoint_worker(request, worker_id):
@@ -219,14 +224,14 @@ def accept_appointment(request, appointment_id):
     if request.method == 'POST':
         appointment.status = 'accepted'
         appointment.save()
-    return redirect('worker_appointments')
+    return redirect('worker_list')
 
 def reject_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id)
     if request.method == 'POST':
         appointment.status = 'rejected'
         appointment.save()
-    return redirect('worker_appointments')
+    return redirect('worker-list')
 
 def delete_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id)
@@ -238,11 +243,11 @@ def delete_appointment(request, appointment_id):
         if request.user == appointment.customer.owner:
             return redirect('customer_appointments')  # Redirect to customer appointments page
         elif request.user == appointment.worker.owner:
-            return redirect('worker_appointments')  # Redirect to worker appointments page
+            return redirect('worker-list')  # Redirect to worker appointments page
     else:
         messages.error(request, "You are not authorized to delete this appointment.")
     
-    return redirect('worker_list')  # Redirect back to customer appointments page
+    return redirect('worker-list')  # Redirect back to customer appointments page
 
 def complete_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id)
@@ -255,7 +260,7 @@ def complete_appointment(request, appointment_id):
     appointment.status = 'completed'
     appointment.save()
 
-    return redirect('worker_appointments')  # Redirect to the worker's dashboard or another relevant page
+    return redirect('worker_list')  # Redirect to the worker's dashboard or another relevant page
 
 def rate_worker(request, appointment_id):
     # Fetch the appointment and ensure the user is the customer
