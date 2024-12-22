@@ -19,8 +19,13 @@
                         <span class="font-semibold">Customer:</span> {{ appointment.customer.name }}
                     </p>
                     <p class="text-gray-700">
+                        <span class="font-semibold">Contact no:</span> {{ appointment.customer.phone_number }}
+                    </p>
+                    <p class="text-gray-700">
                         <span class="font-semibold">Status:</span> {{ appointment.status }}
                     </p>
+                    
+
         
                     <div class="mt-4 flex space-x-4">
                         {% if appointment.status == 'pending' %}

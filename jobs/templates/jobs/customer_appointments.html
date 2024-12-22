@@ -20,6 +20,9 @@
                         <span class="font-semibold">Worker:</span> {{ appointment.worker.name }}
                     </p>
                     <p class="text-gray-700">
+                        <span class="font-semibold">Contact no:</span> {{ appointment.worker.phone_number }}
+                    </p>
+                    <p class="text-gray-700">
                         <span class="font-semibold">Status:</span>     
                         {% if appointment.status == 'pending' %}
                             <span class="text-yellow-500 font-semibold">Pending</span>
