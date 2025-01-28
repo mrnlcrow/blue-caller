@@ -1,23 +1,23 @@
 {% extends 'jobs/_base.html' %}
 
 <style>
-.rating {
-    display: flex;
-    justify-content: center; /* Center the stars horizontally */
-    align-items: center;     /* Center the stars vertically, optional */
-}
+    .rating {
+        display: flex;
+        justify-content: center; /* Center the stars horizontally */
+        align-items: center;     /* Center the stars vertically, optional */
+    }
 
-.stars {
-    display: flex;           /* This will align the stars horizontally */
-    gap: 5px;                /* Space between stars */
-}
+    .stars {
+        display: flex;           /* Align the stars horizontally */
+        gap: 5px;                /* Space between stars */
+    }
 
-.stars svg {
-    width: 24px;             /* Set the size of the stars */
-    height: 24px;
-}
-
+    .stars svg {
+        width: 24px;             /* Set the size of the stars */
+        height: 24px;
+    }
 </style>
+
 {% block content %}
     <!-- Worker Info Section -->
     <div class="bg-white p-6 rounded-lg shadow-xl">
@@ -32,7 +32,7 @@
             <!-- Worker Info -->
             <div>
                 <h1 class="text-3xl font-semibold text-gray-800">{{ object.name }}</h1>
-                
+
                 <!-- Verified Badge -->
                 <div class="flex items-center space-x-2 text-sm text-gray-600 mt-2">
                     {% if worker.verified %}
@@ -41,9 +41,10 @@
                         <span class="text-red-500">&#10008; Not Verified</span>
                     {% endif %}
                 </div>
-                
+
                 <p class="text-lg text-gray-800 mt-3">{{ object.tagline }}</p>
                 <p class="text-lg text-gray-800 mt-2">{{ object.phone_number }}</p>
+
                 <!-- Display Average Rating -->
                 <div class="mt-4 flex items-center justify-center">
                     <div class="flex space-x-1">
@@ -55,7 +56,7 @@
                                         <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                                     </svg>
                                 {% endfor %}
-                
+
                                 <!-- Half Star -->
                                 {% for star in half_star %}
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="gold">
@@ -67,7 +68,7 @@
                                         </defs>
                                     </svg>
                                 {% endfor %}
-                
+
                                 <!-- Empty Stars -->
                                 {% for star in empty_stars %}
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="gray">
@@ -80,9 +81,20 @@
                         <p class="text-gray-600 text-lg font-semibold">({{ total_ratings }})</p>
                     </div>
                 </div>
+
                 <!-- Appoint Worker Button -->
                 <form action="{% url 'appoint-worker' worker.id %}" method="post" class="mt-6">
                     {% csrf_token %}
+                    <div class="mt-4">
+                        <label for="appointment_date" class="text-gray-600 text-lg font-medium">Select Appointment Date:</label>
+                        <input 
+                            type="date" 
+                            id="appointment_date" 
+                            name="appointment_date" 
+                            class="mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            required
+                        >
+                    </div>
                     <button type="submit" class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-lg hover:bg-green-700 transform hover:scale-105 transition duration-300 ease-in-out">
                         Appoint Worker
                     </button>
@@ -100,4 +112,3 @@
         </div>
     </div>
 {% endblock content %}
-

@@ -14,7 +14,7 @@
             {% for appointment in appointments %}
                 <li class="p-4 border rounded-lg bg-gray-50 hover:bg-gray-100 transition duration-300">
                     <p class="text-gray-700">
-                        <span class="font-semibold">Date:</span> {{ appointment.appointment_date|date:"F j, Y, g:i a" }}
+                        <span class="font-semibold">Date:</span> {{ appointment.appointment_date|date:"F j, Y" }}
                     </p>
                     <p class="text-gray-700">
                         <span class="font-semibold">Worker:</span> {{ appointment.worker.name }}
