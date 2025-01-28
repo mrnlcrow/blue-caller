@@ -7,7 +7,7 @@ from jobs.models import Worker, Customer, Appointment, WorkerRating
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
-from django.utils.timezone import make_aware
+from django.utils.timezone import make_aware, now
 from django.core.mail import send_mail
 from django.db.models import Avg, QuerySet
 from jobs.templatetags.distance import calculate_distance
@@ -181,16 +181,24 @@ def handle_login(request):
     return render(request,'jobs/choose_account.html',{})
 
 def appoint_worker(request, worker_id):
-    worker = get_object_or_404(Worker, id = worker_id)
-    appointment_count=Appointment.objects.filter(status="pending",worker=worker).count()
+    worker = get_object_or_404(Worker, id=worker_id)
+
+    # Check if the worker already has a pending appointment
+    appointment_count = Appointment.objects.filter(status="pending", worker=worker).count()
     if appointment_count < 1:
         if request.method == "POST":
             customer = get_object_or_404(Customer, owner=request.user)
             appointment_date_str = request.POST.get("appointment_date")
 
             try:
-                # Parse the date string into a datetime object and make it timezone aware
+                # Parse the date string into a timezone-aware datetime object
                 appointment_date = make_aware(datetime.strptime(appointment_date_str, "%Y-%m-%d"))
+                
+                # Check if the selected date is in the future
+                if appointment_date <= now():
+                    messages.error(request, "You can only book appointments for future dates.")
+                    return redirect('worker-list')
+
                 # Create a new appointment with the selected date
                 appointment = Appointment.objects.create(
                     customer=customer,
@@ -198,6 +206,7 @@ def appoint_worker(request, worker_id):
                     appointment_date=appointment_date,
                     status="pending"
                 )
+
                 # Update the worker's appointment status
                 worker.appointed = True
                 worker.appointment_date = appointment.appointment_date
@@ -207,7 +216,8 @@ def appoint_worker(request, worker_id):
             except ValueError:
                 messages.error(request, "Invalid appointment date. Please try again.")
     else:
-        messages.success(request, "Worker has already been appointed.")
+        messages.error(request, "Worker has already been appointed.")
+
     return redirect('worker-list')
 
 def send_email_to_worker(worker):
