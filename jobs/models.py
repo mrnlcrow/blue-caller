@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from phonenumber_field.modelfields import PhoneNumberField
 
 User=get_user_model()
 
@@ -7,7 +8,7 @@ User=get_user_model()
 class Worker(models.Model):
     owner=models.OneToOneField(User,on_delete=models.CASCADE)
     name=models.CharField(max_length=50)
-    phone_number=models.CharField(max_length=10, unique=True)
+    phone_number=PhoneNumberField(region="NP", unique=True) 
     tagline=models.CharField(max_length=100)
     bio=models.TextField(blank=True)
     profile_pic=models.ImageField(upload_to="profiles/", blank=True)
@@ -30,7 +31,7 @@ class Worker(models.Model):
 class Customer(models.Model):
     owner=models.OneToOneField(User,on_delete=models.CASCADE)
     name=models.CharField(max_length=50)
-    phone_number=models.CharField(max_length=10, unique=True)
+    phone_number=PhoneNumberField(region="NP", unique=True)
     profile_pic=models.ImageField(upload_to="profiles/", blank=True)
     latitude = models.CharField(max_length=20,null=True,blank=True)
     longitude = models.CharField(max_length=20,null=True,blank=True)

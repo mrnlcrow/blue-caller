@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     # local apps
     'jobs',
     'accounts',
+    'phonenumber_field',
 
     #3rd party apps
     'crispy_forms',
@@ -124,6 +125,8 @@ TIME_ZONE = 'Asia/Kathmandu'
 
 USE_I18N = True
 
+USE_L10N = True
+
 USE_TZ = True
 
 
@@ -169,6 +172,9 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_SESSION_REMEMBER = True
+PHONENUMBER_DEFAULT_REGION = "NP"  # Nepal
+PHONENUMBER_DB_FORMAT = 'INTERNATIONAL'  # Use INTERNATIONAL or NATIONAL
+PHONENUMBER_DEFAULT_VALIDATION = True
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
