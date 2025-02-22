@@ -16,6 +16,8 @@
         border: none;
         padding: 10px;
         cursor: pointer;
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     }
     .locate-btn i {
         font-size: 20px;
@@ -25,23 +27,27 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 <div>
     <h1 class="text-2xl my-4">Create Worker Profile</h1>
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        {{form|crispy}}
+        {{ form|crispy }}
         <div id="map"></div>
-        <button class="locate-btn" onclick="locateUser()" type="button"><i class="fas fa-location-arrow"></i></button>
-        <input hidden name="latitude" id="latitude" value="" hidden>
-        <input hidden name="longitude" id="longitude" value="" hidden>
+        <button class="locate-btn" onclick="locateUser()" type="button">
+            <i class="fas fa-location-arrow"></i>
+        </button>
+        <input type="hidden" name="latitude" id="latitude">
+        <input type="hidden" name="longitude" id="longitude">
         <input class="px-8 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 hover:cursor-pointer" type="submit" value="Save">
     </form>
 </div>
-<script>
-    // Initialize the map
-    var map = L.map('map').setView([0, 0], 2);
 
-    // Add a tile layer
+<script>
+    var map = L.map('map').setView([27.7172, 85.3240], 12); // Default to Kathmandu, Nepal
+    var marker;
+
+    // Add OpenStreetMap tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
@@ -52,21 +58,41 @@
             navigator.geolocation.getCurrentPosition(function (position) {
                 var lat = position.coords.latitude;
                 var lon = position.coords.longitude;
-                map.setView([lat, lon], 13);
-
-                L.marker([lat, lon]).addTo(map)
-                    .bindPopup("You are here!")
-                    .openPopup();
-                    document.getElementById('latitude').value = lat;
-                    document.getElementById('longitude').value = lon;
-                // Send the location to the backend
-                // sendLocationToBackend(lat, lon);
+                updateLocation(lat, lon);
+            }, function (error) {
+                alert("Error fetching location: " + error.message);
             });
         } else {
             alert("Geolocation is not supported by this browser.");
         }
     }
-    window.onload = locateUser;
+
+    // Function to update location and set marker
+    function updateLocation(lat, lon) {
+        map.setView([lat, lon], 13);
+
+        // Remove existing marker
+        if (marker) {
+            map.removeLayer(marker);
+        }
+
+        // Add new marker
+        marker = L.marker([lat, lon]).addTo(map)
+            .bindPopup("Selected Location")
+            .openPopup();
+
+        // Set values in hidden fields
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lon;
+    }
+
+    // Allow user to click on the map to select location
+    map.on('click', function (e) {
+        var lat = e.latlng.lat;
+        var lon = e.latlng.lng;
+        updateLocation(lat, lon);
+    });
+
 </script>
 
 {% endblock content %}
